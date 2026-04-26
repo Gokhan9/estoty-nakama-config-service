@@ -5,13 +5,17 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+
+	"nakama-config-service/rpc"
+
+	"github.com/heroiclabs/nakama-common/runtime"
 )
 
-func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, initializer runtime.Initializer) error {
+func Main(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, initializer runtime.Initializer) error {
 
-	initializer.RegisterRpc("update_metadata", rpcUpdateMetadata)
-	initializer.RegisterRpc("get_config", rpcGetConfig)
-	initializer.RegisterRpc("private_ping", rpcPrivatePing)
+	initializer.RegisterRpc("update_metadata", rpc.UpdateMetadata)
+	initializer.RegisterRpc("config", rpc.Config)
+	initializer.RegisterRpc("private_ping", rpc.Ping)
 
 	logger.Info("RPCs registered")
 	return nil

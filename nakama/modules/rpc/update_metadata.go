@@ -20,7 +20,7 @@ func UpdateMetadata(ctx context.Context, logger runtime.Logger, db *sql.DB, nk r
 		return "", runtime.NewError("Invalid JSON", 3)
 	}
 
-	err := nk.AccountUpdateId(ctx, userID, "", metadata, "", "", "", "")
+	err := nk.AccountUpdateId(ctx, userID, "", metadata, "", "", "", "", "")
 	if err != nil {
 		return "", err
 	}

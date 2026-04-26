@@ -8,7 +8,7 @@ import (
 	"github.com/heroiclabs/nakama-common/runtime"
 )
 
-func config(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
+func Config(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
 
 	config := map[string]interface{}{
 		"welcome_message": "Welcome to the game!",
