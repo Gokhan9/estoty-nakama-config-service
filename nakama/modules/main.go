@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"nakama-config-service/rpc"
+	"nakama-config-service/nakama/modules/rpc"
 
 	"github.com/heroiclabs/nakama-common/runtime"
 )

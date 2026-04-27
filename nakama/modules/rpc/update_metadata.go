@@ -11,19 +11,46 @@ import (
 func UpdateMetadata(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
 
 	userID, ok := ctx.Value(runtime.RUNTIME_CTX_USER_ID).(string)
-	if !ok {
-		return "", runtime.NewError("No user ID", 3)
+	if !ok || userID == "" {
+		return "", runtime.NewError("authentication required", 7)
 	}
 
 	var metadata map[string]interface{}
 	if err := json.Unmarshal([]byte(payload), &metadata); err != nil {
-		return "", runtime.NewError("Invalid JSON", 3)
+		return "", runtime.NewError("payload must be a JSON object", 3)
+	}
+	if metadata == nil {
+		return "", runtime.NewError("payload must be a JSON object", 3)
 	}
 
-	err := nk.AccountUpdateId(ctx, userID, "", metadata, "", "", "", "", "")
+	account, err := nk.AccountGetId(ctx, userID)
 	if err != nil {
 		return "", err
 	}
 
-	return `{"status":"ok"}`, nil
+	merged := make(map[string]interface{})
+	if account != nil && account.GetUser() != nil && account.GetUser().GetMetadata() != "" {
+		if err := json.Unmarshal([]byte(account.GetUser().GetMetadata()), &merged); err != nil {
+			logger.Warn("Could not parse existing user metadata, replacing it", "user_id", userID, "error", err.Error())
+			merged = make(map[string]interface{})
+		}
+	}
+	for key, value := range metadata {
+		merged[key] = value
+	}
+
+	err = nk.AccountUpdateId(ctx, userID, "", merged, "", "", "", "", "")
+	if err != nil {
+		return "", err
+	}
+
+	response, err := json.Marshal(map[string]interface{}{
+		"status":   "ok",
+		"metadata": merged,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return string(response), nil
 }
