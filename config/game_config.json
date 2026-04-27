@@ -1,0 +1,10 @@
+{
+  "welcome_message": "Welcome to the game!",
+  "xp_rate": 1.5,
+  "rarity_options": [
+    "common",
+    "rare",
+    "epic",
+    "legendary"
+  ]
+}
