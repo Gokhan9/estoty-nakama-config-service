@@ -1,26 +1,36 @@
-version: "3"
-
 services:
   postgres:
     image: postgres:12
     environment:
-      - POSTGRES_DB=nakama
-      - POSTGRES_PASSWORD=localdb
+      POSTGRES_DB: nakama
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nakama"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
       - "5432:5432"
 
   nakama:
-    image: heroiclabs/nakama:3.22.0
+    build: .
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    environment:
+      GAME_CONFIG_PATH: /nakama/data/config/game_config.json
     entrypoint:
       - "/bin/sh"
       - "-ecx"
       - >
         /nakama/nakama migrate up --database.address postgres:localdb@postgres:5432/nakama &&
-        exec /nakama/nakama --name nakama1 --database.address postgres:localdb@postgres:5432/nakama --logger.level DEBUG
+        exec /nakama/nakama
+        --name nakama1
+        --database.address postgres:localdb@postgres:5432/nakama
+        --logger.level DEBUG
+        --socket.server_key defaultkey
+        --runtime.http_key s2s-dev-key
     ports:
       - "7350:7350"
       - "7351:7351"
-    volumes:
-      - ./nakama/modules:/nakama/data/modules
